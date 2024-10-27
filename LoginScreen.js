@@ -1,32 +1,64 @@
 import React, { useEffect } from 'react';
-import { Button, View, Text } from 'react-native';
-import * as Google from 'expo-auth-session/providers/google';
+import { View, Text, Button, StyleSheet } from 'react-native';
+import { GoogleAuthProvider, signInWithRedirect } from "firebase/auth";
+import { GoogleSignin, statusCodes, GoogleSigninButton } from '@react-native-google-signin/google-signin';
+
 import { auth } from './firebaseConfig';
 
-export default function LoginScreen({ navigation }) {
-  const [request, response, promptAsync] = Google.useAuthRequest({
-    expoClientId: 'YOUR_EXPO_CLIENT_ID',
-    androidClientId: 'YOUR_ANDROID_CLIENT_ID',
-    iosClientId: 'YOUR_IOS_CLIENT_ID',
-  });
+const provider = new GoogleAuthProvider();
 
-  useEffect(() => {
-    if (response?.type === 'success') {
-      const { id_token } = response.params;
-      const credential = firebase.auth.GoogleAuthProvider.credential(id_token);
+const AuthScreen = ({ setAuth }) => {
 
-      auth.signInWithCredential(credential).then(() => {
-        navigation.navigate('Home');
-      }).catch(error => {
-        console.error('Error signing in:', error.message);
-      });
+    const webClientId = "695556696842-8t2fimdp9h4v2r1bqds7msqfqgibor76.apps.googleusercontent.com";
+
+    useEffect(() => {
+        GoogleSignin.configure({
+            webClientId: webClientId,
+        })
+    }, [])
+
+
+    const promptAsync = async () => {
+        try {
+            await GoogleSignin.hasPlayServices();
+            const userInfo = await GoogleSignin.signIn();
+            console.log("userinfo", userInfo);
+
+            setAuth(true);
+        } catch (error) {
+            if (error.code === statusCodes.SIGN_IN_CANCELLED) {
+                console.log(error)
+            } else if (error.code === statusCodes.IN_PROGRESS) {
+                console.log(error)
+            } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+                console.log(error)
+            }
+        }
     }
-  }, [response]);
 
-  return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <Text style={{ fontSize: 24, marginBottom: 20 }}>Login with Google</Text>
-      <Button disabled={!request} title="Sign in with Google" onPress={() => promptAsync()} />
-    </View>
-  );
-}
+    return (
+        <View style={styles.container}>
+            <Text style={styles.title}>Login with Google</Text>
+            <Button
+                title="Sign in with Google"
+                onPress={() => promptAsync()}
+            />
+        </View>
+    );
+};
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 20,
+    },
+    title: {
+        fontSize: 24,
+        marginBottom: 20,
+        fontWeight: 'bold',
+    },
+});
+
+export default AuthScreen;
