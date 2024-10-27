@@ -1,4 +1,3 @@
-// LoginScreen.js
 import React, { useEffect } from 'react';
 import { Button, View, Text } from 'react-native';
 import * as Google from 'expo-auth-session/providers/google';

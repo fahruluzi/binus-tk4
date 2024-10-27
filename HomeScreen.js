@@ -1,4 +1,3 @@
-// HomeScreen.js
 import React, { useEffect, useState } from 'react';
 import MapView, { Marker } from 'react-native-maps';
 import { StyleSheet, View } from 'react-native';
