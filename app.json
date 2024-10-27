@@ -2,6 +2,10 @@
   "expo": {
     "name": "tk4",
     "slug": "tk4",
-    "version": "1.0.0"
+    "version": "1.0.0",
+    "plugins": ["@react-native-google-signin/google-signin"],
+    "android": {
+      "googleServicesFile": "./google-services.json"
+    }
   }
 }

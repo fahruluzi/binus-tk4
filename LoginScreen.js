@@ -1,39 +1,36 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { View, Text, Button, StyleSheet } from 'react-native';
-import { GoogleAuthProvider, signInWithRedirect } from "firebase/auth";
-import { GoogleSignin, statusCodes, GoogleSigninButton } from '@react-native-google-signin/google-signin';
+import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
 
-import { auth } from './firebaseConfig';
-
-const provider = new GoogleAuthProvider();
 
 const AuthScreen = ({ setAuth }) => {
-
-    const webClientId = "695556696842-8t2fimdp9h4v2r1bqds7msqfqgibor76.apps.googleusercontent.com";
-
-    useEffect(() => {
-        GoogleSignin.configure({
-            webClientId: webClientId,
-        })
-    }, [])
-
 
     const promptAsync = async () => {
         try {
             await GoogleSignin.hasPlayServices();
-            const userInfo = await GoogleSignin.signIn();
-            console.log("userinfo", userInfo);
-
-            setAuth(true);
-        } catch (error) {
-            if (error.code === statusCodes.SIGN_IN_CANCELLED) {
-                console.log(error)
-            } else if (error.code === statusCodes.IN_PROGRESS) {
-                console.log(error)
-            } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
-                console.log(error)
+            const response = await GoogleSignin.signIn();
+            if (isSuccessResponse(response)) {
+              setState({ userInfo: response.data });
+              setAuth(true);
+            } else {
+              // sign in was cancelled by user
             }
-        }
+          } catch (error) {
+            if (isErrorWithCode(error)) {
+              switch (error.code) {
+                case statusCodes.IN_PROGRESS:
+                  // operation (eg. sign in) already in progress
+                  break;
+                case statusCodes.PLAY_SERVICES_NOT_AVAILABLE:
+                  // Android only, play services not available or outdated
+                  break;
+                default:
+                // some other error happened
+              }
+            } else {
+              // an error that's not related to google sign in occurred
+            }
+          }
     }
 
     return (
